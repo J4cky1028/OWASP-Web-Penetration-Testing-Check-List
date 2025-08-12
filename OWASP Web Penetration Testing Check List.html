@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OWASP Web Penetration Testing Check List</title>
+  <style>
+    :root{
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #1e40af;
+      --border: #e5e7eb;
+      --chip: #e8eefc;
+      --chip-text: #1e3a8a;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      margin: 8px 0 16px;
+    }
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .brand .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+    .brand h1 { font-size: 1.15rem; margin: 0; }
+    .brand p { margin: 0; font-size: 0.85rem; color: var(--muted); }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .toolbar button {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .toolbar button.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .toolbar button.secondary {
+      background: #f8fafc;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    h2.section-title {
+      margin: 6px 0 12px;
+      font-size: 1.05rem;
+      color: #111827;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+
+    .section {
+      padding: 10px 6px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .section:last-child { border-bottom: none; }
+
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px;
+      padding: 6px 0;
+    }
+    .section-title {
+      font-size: 1.0rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .items { display: grid; gap: 8px; }
+    .item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: start;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .item input[type="checkbox"] {
+      width: 18px; height: 18px; margin-top: 3px;
+    }
+    .item label { cursor: default; }
+
+    .notes {
+      grid-column: 1 / -1;
+      margin-top: 6px;
+      display: none;
+    }
+    .notes textarea {
+      width: 100%; min-height: 60px; resize: vertical;
+      padding: 8px; border-radius: 6px; border: 1px solid var(--border);
+      font-family: inherit; font-size: 0.95rem;
+    }
+
+    .notes-toggle {
+      align-self: center;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #f3f4f6;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    /* Status badge */
+    .status {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+    .done { background: #dcfce7; color: #065f46; border-color: #a7f3d0; }
+    .pending { background: #fef3c7; color: #7c5f00; border-color: #fbd38d; }
+
+    /* Collapsible for mobile-friendly view */
+    details > summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 860px) {
+      .item { grid-template-columns: auto 1fr; }
+      .notes { grid-column: 1 / -1; }
+    }
+
+    /* Print styles for a clean printout */
+    @media print {
+      body { background: #fff; color: #000; }
+      .container { padding: 0; }
+      header, .toolbar { display: none; }
+      .panel { border: none; box-shadow: none; }
+      .item { page-break-inside: avoid; }
+      details { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header aria-label="OWASP Web Checklist header">
+      <div class="brand">
+        <div class="logo" aria-label="Logo"></div>
+        <div>
+          <h1>OWASP Web Penetration Testing Check List</h1>
+          <p>Web Application Security Testing Check List</p>
+        </div>
+      </div>
+      <div class="toolbar" aria-label="Export and actions">
+        <button data-action="export-json" title="Export as JSON">Export JSON</button>
+        <button data-action="export-csv" title="Export as CSV">Export CSV</button>
+        <button data-action="export-md" title="Export as Markdown">Export Markdown</button>
+        <button data-action="print" class="secondary" title="Print checklist">Print</button>
+        <button data-action="reset" title="Reset to defaults">Reset</button>
+      </div>
+    </header>
+
+    <section class="panel" aria-label="Checklist">
+      <h2 class="section-title" style="margin:0 0 8px 6px;">OWASP Web Checklist (Categories & Items)</h2>
+      <div id="checklist" aria-label="Checklist items"></div>
+      <p style="font-size:0.9rem; color:var(--muted); padding:6px 6px 0;">
+        Tip: Export formats include JSON, CSV, and Markdown for sharing or documentation.
+      </p>
+    </section>
+
+    <section class="panel" aria-label="Notes and guidance">
+      <h2 class="section-title" style="margin:0 0 8px 6px;">Notes</h2>
+      <p style="margin:0 6px 12px; color:var(--muted); font-size:0.92rem;">
+        This checklist is a practical, web-based rendition of the OWASP Web Checklist. Customize items as needed for your project.
+      </p>
+    </section>
+
+  </div>
+
+  <script>
+    // Data derived from the OWASP Web Checklist (as listed in the repo)
+    const SECTIONS = [
+      {
+        key: 'info-gathering',
+        title: 'Information Gathering',
+        items: [
+          { id: 'explore', text: 'Manually explore the site' },
+          { id: 'crawl', text: 'Spider/crawl for missed or hidden content' },
+          { id: 'expose', text: 'Check for files that expose content (robots.txt, sitemap.xml, .DS_Store)' },
+          { id: 'caches', text: 'Check caches of major search engines for publicly accessible sites' },
+          { id: 'ua-diff', text: 'Check differences in content based on User Agent (mobile, crawler)' },
+          { id: 'fingerprint', text: 'Perform Web Application Fingerprinting' },
+          { id: 'tech', text: 'Identify technologies used' },
+          { id: 'roles', text: 'Identify user roles' },
+          { id: 'entry', text: 'Identify application entry points' },
+          { id: 'client', text: 'Identify client-side code' },
+          { id: 'versions', text: 'Identify multiple versions/channels (web, mobile, web services)' },
+          { id: 'cohost', text: 'Identify co-hosted and related applications' },
+          { id: 'hostports', text: 'Identify all hostnames and ports' },
+          { id: 'thirdparty', text: 'Identify third-party hosted content' }
+        ]
+      },
+      {
+        key: 'config',
+        title: 'Configuration Management',
+        items: [
+          { id: 'apps', text: 'Check commonly used application and administrative URLs' },
+          { id: 'backup', text: 'Check old, backup, and unreferenced files' },
+          { id: 'http-methods', text: 'Check HTTP methods supported and Cross Site Tracing (XST)' },
+          { id: 'extensions', text: 'Test file extensions handling' },
+          { id: 'headers', text: 'Test security HTTP headers (CSP, X-Frame-Options, HSTS)' },
+          { id: 'policies', text: 'Test policies (Flash, Silverlight, robots)' },
+          { id: 'data-live', text: 'Test for non-production data in live environment, and vice-versa' },
+          { id: 'client-secrets', text: 'Check for sensitive data in client-side code (API keys, credentials)' }
+        ]
+      },
+      {
+        key: 'transmission',
+        title: 'Secure Transmission',
+        items: [
+          { id: 'ssl', text: 'Check SSL version, algorithms, key length' },
+          { id: 'cert', text: 'Check Digital Certificate validity (duration, signature, CN)' },
+          { id: 'https-cred', text: 'Check credentials only delivered over HTTPS' },
+          { id: 'login-hhttps', text: 'Check login form delivered over HTTPS' },
+          { id: 'token-https', text: 'Check session tokens only delivered over HTTPS' },
+          { id: 'hsts', text: 'Check if HTTP Strict Transport Security (HSTS) is in use' }
+        ]
+      },
+      {
+        key: 'auth',
+        title: 'Authentication',
+        items: [
+          { id: 'user-enum', text: 'Test for user enumeration' },
+          { id: 'auth-bypass', text: 'Test for authentication bypass' },
+          { id: 'bruteforce', text: 'Test for bruteforce protection' },
+          { id: 'pwd-quality', text: 'Test password quality rules' },
+          { id: 'remember', text: 'Test remember me functionality' },
+          { id: 'autocomplete', text: 'Test autocomplete on password fields' },
+          { id: 'pwd-reset', text: 'Test password reset/recovery' },
+          { id: 'pwd-change', text: 'Test password change process' },
+          { id: 'captcha', text: 'Test CAPTCHA' },
+          { id: 'mfa', text: 'Test multi-factor authentication' },
+          { id: 'logout', text: 'Test logout functionality presence' },
+          { id: 'cache-http', text: 'Test cache management on HTTP headers' },
+          { id: 'default-logins', text: 'Test default logins' },
+          { id: 'auth-history', text: 'Test user-accessible authentication history' },
+          { id: 'out-of-band', text: 'Test out-of-band notifications for account lockouts' },
+          { id: 'sso', text: 'Test consistent authentication across apps with SSO' }
+        ]
+      },
+      {
+        key: 'session',
+        title: 'Session Management',
+        items: [
+          { id: 'how', text: 'Establish how session management is handled' },
+          { id: 'cookie-flags', text: 'Check cookie flags (HttpOnly, Secure)' },
+          { id: 'cookie-scope', text: 'Check session cookie scope (path, domain)' },
+          { id: 'cookie-dur', text: 'Check session cookie duration (expires, max-age)' },
+          { id: 'terminate-life', text: 'Terminate session after max lifetime' },
+          { id: 'timeout', text: 'Terminate session after relative timeout' },
+          { id: 'logout-term', text: 'Terminate session after logout' },
+          { id: 'multi-sessions', text: 'Support for multiple simultaneous sessions' },
+          { id: 'cookie-random', text: 'Test session cookies for randomness' },
+          { id: 'token-rotation', text: 'Rotate tokens on login/role change/logout' },
+          { id: 'shared-sso', text: 'Consistent session management with shared SSO' },
+          { id: 'csrf', text: 'CSRF and clickjacking protections' }
+        ]
+      },
+      {
+        key: 'authorization',
+        title: 'Authorization',
+        items: [
+          { id: 'path-traversal', text: 'Test for path traversal' },
+          { id: 'auth-schema-bypass', text: 'Test bypassing authorization schema' },
+          { id: 'priv-esc', text: 'Vertical Access control (privilege escalation)' },
+          { id: 'horizontal', text: 'Horizontal access control (between same-level users)' },
+          { id: 'missing-auth', text: 'Test for missing authorization' }
+        ]
+      },
+      {
+        key: 'data-validation',
+        title: 'Data Validation',
+        items: [
+          { id: 'reflected-xss', text: 'Reflected XSS' },
+          { id: 'stored-xss', text: 'Stored XSS' },
+          { id: 'dom-xss', text: 'DOM-based XSS' },
+          { id: 'html-injection', text: 'HTML Injection' },
+          { id: 'sql-injection', text: 'SQL Injection' },
+          { id: 'soql', text: 'SOQL Injection' },
+          { id: 'ldap', text: 'LDAP Injection' },
+          { id: 'orm', text: 'ORM Injection' },
+          { id: 'xml', text: 'XML Injection' },
+          { id: 'xxe', text: 'XXE (XML External Entity)' },
+          { id: 'ssi', text: 'SSI Injection' },
+          { id: 'xpath', text: 'XPath/XQuery Injection' },
+          { id: 'imap', text: 'IMAP/SMTP Injection' },
+          { id: 'code', text: 'Code Injection' },
+          { id: 'cmd', text: 'Command Injection' },
+          { id: 'overflow', text: 'Overflow (Stack/Heap/Integer)' },
+          { id: 'format', text: 'Format String' },
+          { id: 'incubated', text: 'Incubated vulnerabilities' },
+          { id: 'http-sm', text: 'HTTP Splitting/Smuggling' },
+          { id: 'http-verb', text: 'HTTP Verb Tampering' },
+          { id: 'open-redir', text: 'Open Redirection' },
+          { id: 'lfi', text: 'Local File Inclusion' },
+          { id: 'rfi', text: 'Remote File Inclusion' },
+          { id: 'client-server-valid', text: 'Compare client-side and server-side validation' },
+          { id: 'nosql', text: 'NoSQL/SQL injection combinations' },
+          { id: 'hpp', text: 'HTTP Parameter Pollution' },
+          { id: 'autobind', text: 'Auto-binding' },
+          { id: 'mass-assign', text: 'Mass Assignment' },
+          { id: 'null-cookie', text: 'NULL/Invalid Session Cookie' }
+        ]
+      },
+      {
+        key: 'dos',
+        title: 'Denial of Service',
+        items: [
+          { id: 'anti-automation', text: 'Anti-automation controls' },
+          { id: 'lockout', text: 'Account lockout behavior' },
+          { id: 'http-dos', text: 'HTTP DoS vulnerabilities' },
+          { id: 'wildcard-dos', text: 'SQL wildcard DoS' }
+        ]
+      },
+      {
+        key: 'biz-logic',
+        title: 'Business Logic',
+        items: [
+          { id: 'feature-misuse', text: 'Feature misuse' },
+          { id: 'non-rep', text: 'Lack of non-repudiation' },
+          { id: 'trust', text: 'Trust relationships' },
+          { id: 'integrity', text: 'Integrity of data' },
+          { id: 'segregation', text: 'Segregation of duties' }
+        ]
+      },
+      {
+        key: 'cryptography',
+        title: 'Cryptography',
+        items: [
+          { id: 'weak', text: 'Weak algorithms' },
+          { id: 'salt', text: 'Proper use of salt' },
+          { id: 'rng', text: 'Proper use of randomness functions' },
+          { id: 'encryption', text: 'Proper use of encryption' }
+        ]
+      },
+      {
+        key: 'risk-file-upload',
+        title: 'Risky Functionality - File Uploads',
+        items: [
+          { id: 'types', text: 'Whitelisted file types' },
+          { id: 'limits', text: 'File size limits & upload frequency' },
+          { id: 'contents', text: 'File contents match defined file type' },
+          { id: 'antivirus', text: 'Anti-Virus scanning in place' },
+          { id: 'filenames', text: 'Sanitize unsafe filenames' },
+          { id: 'webroot', text: 'Uploaded files not directly accessible in web root' },
+          { id: 'samehost', text: 'Uploaded files not served on same hostname/port' },
+          { id: 'auth', text: 'Uploaded files integrated with auth/authorization' }
+        ]
+      },
+      {
+        key: 'risk-cardpay',
+        title: 'Risky Functionality - Card Payment',
+        items: [
+          { id: 'default-passwords', text: 'Default or guessable passwords' },
+          { id: 'prod-data', text: 'Non-production data in live environment' },
+          { id: 'injections', text: 'Injections' },
+          { id: 'overflows', text: 'Buffer overflows' },
+          { id: 'insecure-storage', text: 'Insecure cryptographic storage' },
+          { id: 'transport', text: 'Insufficient transport layer protection' },
+          { id: 'error-handling', text: 'Improper error handling' },
+          { id: 'cvss', text: 'Vulnerabilities with CVSS v2 > 4.0' },
+          { id: 'auth-issues', text: 'Authentication/Authorization issues' },
+          { id: 'csrf', text: 'CSRF protections' }
+        ]
+      },
+      {
+        key: 'html5',
+        title: 'HTML 5',
+        items: [
+          { id: 'web-messaging', text: 'Web Messaging' },
+          { id: 'web-storage', text: 'Web Storage (and injection risks)' },
+          { id: 'cors', text: 'CORS implementation' },
+          { id: 'offline', text: 'Offline Web App capabilities' }
+        ]
+      }
+    ];
+
+    const LS_KEY = 'owasp.web.checklist.v1';
+
+    // Render the checklist
+    function renderChecklist() {
+      const container = document.getElementById('checklist');
+      container.innerHTML = '';
+
+      SECTIONS.forEach(section => {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'section';
+
+        const header = document.createElement('div');
+        header.className = 'section-header';
+        const h3 = document.createElement('h3');
+        h3.className = 'section-title';
+        h3.textContent = section.title;
+        header.appendChild(h3);
+
+        const hint = document.createElement('span');
+        hint.style.fontSize = '0.85rem';
+        hint.style.color = 'var(--muted)';
+        hint.textContent = 'State saved locally';
+        header.appendChild(hint);
+
+        sectionDiv.appendChild(header);
+
+        const itemsDiv = document.createElement('div');
+        itemsDiv.className = 'items';
+
+        section.items.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'item';
+          itemDiv.setAttribute('data-section', section.key);
+          itemDiv.setAttribute('data-id', item.id);
+
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.id = `cb-${section.key}-${item.id}`;
+          cb.className = 'cb';
+          itemDiv.appendChild(cb);
+
+          const label = document.createElement('label');
+          label.htmlFor = cb.id;
+          label.textContent = item.text;
+          itemDiv.appendChild(label);
+
+          const notesBtn = document.createElement('button');
+          notesBtn.type = 'button';
+          notesBtn.className = 'notes-toggle';
+          notesBtn.textContent = 'Notes';
+          notesBtn.title = 'Add notes for this item';
+          itemDiv.appendChild(notesBtn);
+
+          const notesDiv = document.createElement('div');
+          notesDiv.className = 'notes';
+          notesDiv.id = `notes-${section.key}-${item.id}`;
+
+          const ta = document.createElement('textarea');
+          ta.rows = 2;
+          ta.placeholder = 'Notes (evidence, findings, references)';
+          notesDiv.appendChild(ta);
+
+          itemDiv.appendChild(notesDiv);
+
+          // Toggle notes
+          notesBtn.addEventListener('click', () => {
+            const isHidden = notesDiv.style.display === 'none' || notesDiv.style.display === '';
+            notesDiv.style.display = isHidden ? 'block' : 'none';
+            ta.focus();
+          });
+
+          // Persist state on interaction
+          cb.addEventListener('change', persistState);
+          ta.addEventListener('input', persistState);
+
+          itemsDiv.appendChild(itemDiv);
+        });
+
+        sectionDiv.appendChild(itemsDiv);
+        container.appendChild(sectionDiv);
+      });
+
+      // Apply saved state if present
+      applySavedState();
+      // Attach listener for potential future dynamic changes
+    }
+
+    // Load and apply saved state
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
+
+    function applySavedState() {
+      const saved = loadState();
+      if (!saved) return;
+      SECTIONS.forEach(section => {
+        const secKey = section.key;
+        section.items.forEach(item => {
+          const itemState = saved?.[secKey]?.[item.id];
+          if (!itemState) return;
+          const cb = document.getElementById(`cb-${secKey}-${item.id}`);
+          if (cb) cb.checked = !!itemState.done;
+          const ta = document.querySelector(`#notes-${secKey}-${item.id} textarea`);
+          if (ta) ta.value = itemState.notes ?? '';
+        });
+      });
+    }
+
+    // Persist state for all items
+    function persistState() {
+      const state = {};
+      SECTIONS.forEach(section => {
+        const secKey = section.key;
+        state[secKey] = {};
+        section.items.forEach(item => {
+          const cb = document.getElementById(`cb-${secKey}-${item.id}`);
+          const ta = document.querySelector(`#notes-${secKey}-${item.id} textarea`);
+          const done = cb ? cb.checked : false;
+          const notes = ta ? ta.value : '';
+          state[secKey][item.id] = { done, notes };
+        });
+      });
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    }
+
+    // Exports
+    function buildExportData() {
+      const saved = loadState() || {};
+      const sections = SECTIONS.map(section => {
+        const secKey = section.key;
+        const items = section.items.map(item => {
+          const itemState = saved?.[secKey]?.[item.id] ?? { done: false, notes: '' };
+          return {
+            id: item.id,
+            text: item.text,
+            done: !!itemState.done,
+            notes: itemState.notes ?? ''
+          };
+        });
+        return {
+          section: section.title,
+          key: secKey,
+          items
+        };
+      });
+      return sections;
+    }
+
+    function exportJSON() {
+      const data = buildExportData();
+      const json = JSON.stringify(data, null, 2);
+      downloadBlob(json, 'application/json', 'owasp-web-checklist.json');
+    }
+
+    function exportCSV() {
+      const saved = loadState() || {};
+      const lines = [];
+      lines.push(['Section','Item','Done','Notes'].join(','));
+      SECTIONS.forEach(section => {
+        const secKey = section.key;
+        section.items.forEach(item => {
+          const itemState = saved?.[secKey]?.[item.id] ?? { done: false, notes: '' };
+          const sectionTitle = section.title;
+          lines.push([
+            escapeCSV(sectionTitle),
+            escapeCSV(item.text),
+            itemState.done ? 'Yes' : 'No',
+            escapeCSV(itemState.notes)
+          ].join(','));
+        });
+      });
+      const csv = lines.join('\n');
+      downloadBlob(csv, 'text/csv', 'owasp-web-checklist.csv');
+    }
+
+    function exportMarkdown() {
+      const data = buildExportData();
+      let md = '# OWASP Web Checklist\n\n';
+      data.forEach(sec => {
+        md += `## ${sec.section}\n\n`;
+        sec.items.forEach(it => {
+          const mark = it.done ? 'x' : ' ';
+          md += `- [${mark}] ${it.text}\n`;
+          if (it.notes && it.notes.trim()) {
+            md += `  - Note: ${it.notes.trim().replace(/\n/g, ' | ')}\n`;
+          }
+        });
+        md += `\n`;
+      });
+      downloadBlob(md, 'text/markdown', 'owasp-web-checklist.md');
+    }
+
+    // Helpers
+    function downloadBlob(content, mimeType, filename) {
+      const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeCSV(value) {
+      if (value == null) value = '';
+      const s = String(value);
+      if (/[",\n]/.test(s)) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }
+
+    // Initialize
+    function init() {
+      renderChecklist();
+
+      // Wire up export actions
+      document.querySelector('[data-action="export-json"]').addEventListener('click', exportJSON);
+      document.querySelector('[data-action="export-csv"]').addEventListener('click', exportCSV);
+      document.querySelector('[data-action="export-md"]').addEventListener('click', exportMarkdown);
+      document.querySelector('[data-action="print"]').addEventListener('click', () => window.print());
+      document.querySelector('[data-action="reset"]').addEventListener('click', () => {
+        localStorage.removeItem(LS_KEY);
+        // Re-render fresh
+        renderChecklist();
+      });
+
+      // Auto-save on unload
+      window.addEventListener('beforeunload', persistState);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
